@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<LangVersion>preview</LangVersion>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Analyzers" Version="1.0.*">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Include="BepInEx.Core" Version="5.4.21" />
+
+		<PackageReference Include="R2API.Items" Version="1.0.*" />
+		<PackageReference Include="R2API.Language" Version="1.0.*" />
+
+		<PackageReference Include="UnityEngine.Modules" Version="2021.3.33" IncludeAssets="compile" />
+		<PackageReference Include="RiskOfRain2.GameLibs" Version="1.3.9.0-r.0" />
+		<PackageReference Include="MMHOOK.RoR2" Version="2025.6.3" NoWarn="NU1701" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+		<PackageReference Include="NETStandard.Library" Version="2.0.3" />
+	</ItemGroup>
+
+	<!-- <PropertyGroup>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<PublishSingleFile>false</PublishSingleFile>
+		<SelfContained>false</SelfContained>
+	</PropertyGroup> -->
+
+	<!-- Force copy framework assemblies that BepInEx needs -->
+	<!-- <Target Name="CopyFrameworkAssemblies" AfterTargets="Build">
+		<PropertyGroup>
+			<DotNetPath>C:\Program Files\dotnet</DotNetPath>
+			<RefAssembliesPath>$(DotNetPath)\packs\NETStandard.Library.Ref\2.1.0\ref\netstandard2.1</RefAssembliesPath>
+		</PropertyGroup>
+		<ItemGroup>
+			<FrameworkAssemblies Include="$(RefAssembliesPath)\System.Runtime.dll" />
+			<FrameworkAssemblies Include="$(RefAssembliesPath)\System.Core.dll" />
+			<FrameworkAssemblies Include="$(RefAssembliesPath)\System.dll" />
+			<FrameworkAssemblies Include="$(RefAssembliesPath)\netstandard.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(FrameworkAssemblies)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" ContinueOnError="true" />
+	</Target> -->
+	
+
+</Project>

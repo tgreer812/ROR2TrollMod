@@ -1,0 +1,13 @@
+{
+  "body": {
+    "content": "eyJpdGVtTmFtZSI6ICJEYWdnZXIifQ==",
+    "file": false,
+    "fileSize": false
+  },
+  "headers": {
+    "content-type": "application/json"
+  },
+  "method": "POST",
+  "title": "Set Item by Name",
+  "url": "http://localhost:8080/api/set-item"
+}
