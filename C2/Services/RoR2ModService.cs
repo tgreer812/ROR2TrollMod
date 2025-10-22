@@ -33,13 +33,14 @@ public class RoR2ModService : IRoR2ModService
     {
         try
         {
-            // TODO: Replace with actual API endpoint from the mod
-            var response = await _httpClient.GetFromJsonAsync<List<Player>>($"{_baseUrl}/api/players");
-            return response ?? new List<Player>();
+            var response = await _httpClient.GetAsync($"{_baseUrl}/api/players");
+            var json = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Players API Response: {json}");
+            var playersResponse = System.Text.Json.JsonSerializer.Deserialize<PlayersResponse>(json) ?? new PlayersResponse();
+            return playersResponse.Players ?? new List<Player>();
         }
         catch (Exception ex)
         {
-            // TODO: Add proper logging
             Console.WriteLine($"Error getting players: {ex.Message}");
             return new List<Player>();
         }

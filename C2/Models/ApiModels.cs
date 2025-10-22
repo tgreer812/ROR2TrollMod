@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
+
 namespace C2.Models;
 
 public class Player
 {
+    [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
+    
+    [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 }
 
@@ -45,4 +50,19 @@ public class ApiResponse
     public bool? Enabled { get; set; }
     public string Timestamp { get; set; } = string.Empty;
     public string Error { get; set; } = string.Empty;
+    public List<Player>? Players { get; set; }
+    public int? Count { get; set; }
+    public List<string>? SelectedPlayers { get; set; }
+}
+
+public class PlayersResponse
+{
+    [JsonPropertyName("players")]
+    public List<Player> Players { get; set; } = new();
+    
+    [JsonPropertyName("count")]
+    public int Count { get; set; }
+    
+    [JsonPropertyName("timestamp")]
+    public string Timestamp { get; set; } = string.Empty;
 }

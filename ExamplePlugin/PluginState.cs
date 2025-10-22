@@ -10,6 +10,8 @@ namespace ExamplePlugin
         public static string LastPurchaser = "";
 
         public static List<NetworkUser> AllPlayers = new List<NetworkUser>();
+        
+        public static List<string> SelectedPlayers = new List<string>();
 
         public static string Summary
         {
@@ -17,10 +19,15 @@ namespace ExamplePlugin
             {
                 string ret = string.Empty;
                 ret += $"LastPurchaser: {LastPurchaser}\n";
-                ret += "=====Players=====\n";
+                ret += "=====All Players=====\n";
                 foreach (var player in AllPlayers) 
                 {
                     ret += $"{player.userName}\n";
+                }
+                ret += "=====Selected Players=====\n";
+                foreach (var playerName in SelectedPlayers) 
+                {
+                    ret += $"{playerName}\n";
                 }
                 ret += "==========\n";
                 return ret; 

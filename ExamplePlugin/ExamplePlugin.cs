@@ -111,12 +111,17 @@ namespace ExamplePlugin
 
         private static void ChestBehavior_BaseItemDropHook(On.RoR2.ChestBehavior.orig_BaseItemDrop orig, ChestBehavior self)
         {
-            
-            if (ItemController.IsEnabled && ItemController.CurrentPickupIndex != PickupIndex.none)
+            // Only apply hook if the mod is enabled, and the chest was opened by a player that
+            // is 'selected'
+            if (
+                ItemController.IsEnabled &&
+                PluginState.SelectedPlayers.Contains(PluginState.LastPurchaser) &&
+                ItemController.CurrentPickupIndex != PickupIndex.none)
             {
                 self.dropPickup = ItemController.CurrentPickupIndex;
                 Log.Info($"Overriding pickup to: {ItemController.CurrentlySelectedItem?.DisplayName} ({self.dropPickup})");
             }
+            
             orig(self);
         }
 
@@ -182,12 +187,14 @@ namespace ExamplePlugin
                 Log.Info("Available endpoints:");
                 Log.Info("  GET  /api/status - Get current status");
                 Log.Info("  GET  /api/items - Get all available items");
+                Log.Info("  GET  /api/players - Get all players");
                 Log.Info("  POST /api/cycle - Cycle to next item");
                 Log.Info("  POST /api/cycle-tier - Cycle to next tier");
                 Log.Info("  POST /api/toggle - Toggle enabled/disabled");
                 Log.Info("  POST /api/enable - Enable item picker");
                 Log.Info("  POST /api/disable - Disable item picker");
                 Log.Info("  POST /api/set-item - Set item by name (JSON: {\"itemName\":\"ItemName\"})");
+                Log.Info("  POST /api/set-players - Set selected players (JSON: {\"players\":[\"PlayerName1\",\"PlayerName2\"]})");
             }
             catch (System.Exception ex)
             {
