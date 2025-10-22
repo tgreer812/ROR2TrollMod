@@ -1,0 +1,43 @@
+.home-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.home-container h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+}
+
+.controls-section {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.item-cards-section {
+    margin-top: 40px;
+}
+
+.item-cards-section h2 {
+    color: #495057;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .controls-section {
+        flex-direction: column;
+        gap: 15px;
+    }
+}

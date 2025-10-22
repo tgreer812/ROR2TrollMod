@@ -1,0 +1,21 @@
+<div class="dropdown-container">
+    <label for="player-select" class="dropdown-label">Players:</label>
+    <select id="player-select" @bind="SelectedPlayer" @bind:after="OnPlayerChanged" class="dropdown-select">
+        <option value="">Select a player...</option>
+        @foreach (var player in Players)
+        {
+            <option value="@player">@player</option>
+        }
+    </select>
+</div>
+
+@code {
+    [Parameter] public string SelectedPlayer { get; set; } = "";
+    [Parameter] public EventCallback<string> SelectedPlayerChanged { get; set; }
+    [Parameter] public List<string> Players { get; set; } = new();
+
+    private async Task OnPlayerChanged()
+    {
+        await SelectedPlayerChanged.InvokeAsync(SelectedPlayer);
+    }
+}

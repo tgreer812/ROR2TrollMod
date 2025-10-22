@@ -1,10 +1,12 @@
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
+using SimpleJSON;
 
 namespace LightweightAPI
 {
@@ -145,6 +147,9 @@ namespace LightweightAPI
                     case "GET /api/items":
                         responseJson = GetAllItems();
                         break;
+                    case "GET /api/players":
+                        responseJson = GetAllPlayers();
+                        break;
                     case "POST /api/cycle":
                         responseJson = CycleItem();
                         break;
@@ -162,6 +167,9 @@ namespace LightweightAPI
                         break;
                     case "POST /api/set-item":
                         responseJson = await SetItemByName(request);
+                        break;
+                    case "POST /api/set-players":
+                        responseJson = await SetSelectedPlayers(request);
                         break;
                     default:
                         response.StatusCode = 404;
@@ -281,6 +289,112 @@ namespace LightweightAPI
             catch (Exception ex)
             {
                 return $"{{\"error\":\"Failed to set item\",\"message\":\"{ex.Message}\",\"timestamp\":\"{DateTime.Now:yyyy-MM-ddTHH:mm:ss}\"}}";
+            }
+        }
+
+        private string GetAllPlayers()
+        {
+            try
+            {
+                var playersArray = new JSONArray();
+                var allPlayers = ExamplePlugin.PluginState.AllPlayers ?? new List<RoR2.NetworkUser>();
+                
+                foreach (var player in allPlayers)
+                {
+                    var playerObj = new JSONObject();
+                    playerObj["name"] = player.userName ?? "Unknown";
+                    playerObj["id"] = player.Network_id.steamId.ToString();
+                    playersArray.Add(playerObj);
+                }
+
+                var response = new JSONObject();
+                response["players"] = playersArray;
+                response["count"] = playersArray.Count;
+                response["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                return response.ToString();
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new JSONObject();
+                errorResponse["error"] = "Failed to get players";
+                errorResponse["message"] = ex.Message;
+                errorResponse["players"] = new JSONArray();
+                errorResponse["count"] = 0;
+                errorResponse["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return errorResponse.ToString();
+            }
+        }
+
+        private async Task<string> SetSelectedPlayers(HttpListenerRequest request)
+        {
+            try
+            {
+                // Read the request body
+                string requestBody;
+                using (var reader = new StreamReader(request.InputStream, request.ContentEncoding))
+                {
+                    requestBody = await reader.ReadToEndAsync();
+                }
+
+                // Simple JSON parsing to extract players array
+                var playerNames = new List<string>();
+                if (!string.IsNullOrEmpty(requestBody))
+                {
+                    // Look for "players":[...] pattern
+                    var startIndex = requestBody.IndexOf("\"players\"");
+                    if (startIndex >= 0)
+                    {
+                        var colonIndex = requestBody.IndexOf(':', startIndex);
+                        if (colonIndex >= 0)
+                        {
+                            var arrayStart = requestBody.IndexOf('[', colonIndex);
+                            var arrayEnd = requestBody.IndexOf(']', arrayStart);
+                            if (arrayStart >= 0 && arrayEnd > arrayStart)
+                            {
+                                var arrayContent = requestBody.Substring(arrayStart + 1, arrayEnd - arrayStart - 1);
+                                if (!string.IsNullOrWhiteSpace(arrayContent))
+                                {
+                                    // Split by comma and clean up quotes
+                                    var parts = arrayContent.Split(',');
+                                    foreach (var part in parts)
+                                    {
+                                        var cleaned = part.Trim().Trim('"');
+                                        if (!string.IsNullOrEmpty(cleaned))
+                                        {
+                                            playerNames.Add(cleaned);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Update the selected players list
+                ExamplePlugin.PluginState.SelectedPlayers = playerNames;
+
+                var selectedPlayersArray = new JSONArray();
+                foreach (var playerName in playerNames)
+                {
+                    selectedPlayersArray.Add(playerName);
+                }
+
+                var response = new JSONObject();
+                response["message"] = "Selected players updated";
+                response["selectedPlayers"] = selectedPlayersArray;
+                response["count"] = playerNames.Count;
+                response["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                return response.ToString();
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new JSONObject();
+                errorResponse["error"] = "Failed to set selected players";
+                errorResponse["message"] = ex.Message;
+                errorResponse["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return errorResponse.ToString();
             }
         }
 

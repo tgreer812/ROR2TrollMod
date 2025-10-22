@@ -1,0 +1,58 @@
+<div class="player-selection-container">
+    <h3 class="player-selection-title">Affected Players</h3>
+    @if (IsLoading)
+    {
+        <div class="loading-message">
+            <p>Loading players...</p>
+        </div>
+    }
+    else if (Players.Any())
+    {
+        <div class="players-list">
+            @foreach (var player in Players)
+            {
+                <div class="player-item">
+                    <label class="player-checkbox-label">
+                        <input type="checkbox" 
+                               class="player-checkbox"
+                               @onchange="@((e) => HandlePlayerToggle(player, (bool)e.Value!))"
+                               checked="@SelectedPlayerNames.Contains(player.Name)" />
+                        <span class="player-name">@player.Name</span>
+                    </label>
+                </div>
+            }
+        </div>
+        <div class="selection-summary">
+            <span>@SelectedPlayerNames.Count of @Players.Count players selected</span>
+        </div>
+    }
+    else
+    {
+        <div class="no-players-message">
+            <p>No players found on server.</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<Player> Players { get; set; } = new();
+    [Parameter] public bool IsLoading { get; set; } = false;
+    [Parameter] public EventCallback<List<string>> OnSelectionChanged { get; set; }
+
+    private HashSet<string> SelectedPlayerNames { get; set; } = new();
+
+    private async Task HandlePlayerToggle(Player player, bool isChecked)
+    {
+        if (isChecked)
+        {
+            SelectedPlayerNames.Add(player.Name);
+        }
+        else
+        {
+            SelectedPlayerNames.Remove(player.Name);
+        }
+
+        // Notify parent component of the change
+        await OnSelectionChanged.InvokeAsync(SelectedPlayerNames.ToList());
+    }
+}

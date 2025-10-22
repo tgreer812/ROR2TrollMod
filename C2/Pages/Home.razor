@@ -1,0 +1,120 @@
+﻿@page "/"
+@inject IRoR2ModService ModService
+
+<PageTitle>RoR2 Troll Mod</PageTitle>
+
+<div class="home-container">
+    <h1>RoR2 Troll Mod Control Panel</h1>
+    
+    <div class="controls-section">
+        <EnableToggle @bind-IsEnabled="isModEnabled" @bind-IsEnabled:after="HandleToggleChanged" />
+        <PlayerSelection Players="@playerList" IsLoading="@isLoadingPlayers" OnSelectionChanged="@HandlePlayerSelectionChanged" />
+    </div>
+
+    <div class="item-cards-section">
+        <h2>Item Cards</h2>
+        <ItemCardsContainer Items="@items" IsLoading="@isLoading" />
+    </div>
+</div>
+
+@code {
+    private bool isModEnabled = false;
+    private List<Player> playerList = new List<Player>();
+    private List<Item> items = new List<Item>();
+    private bool isLoading = true;
+    private bool isLoadingPlayers = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        isLoadingPlayers = true;
+        await Task.WhenAll(LoadPlayers(), LoadItems());
+        isLoading = false;
+        isLoadingPlayers = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadPlayers()
+    {
+        try
+        {
+            playerList = await ModService.GetAllPlayersAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load players: {ex.Message}");
+            playerList = new List<Player>();
+        }
+    }
+
+    private async Task LoadItems()
+    {
+        try
+        {
+            items = await ModService.GetAllItemsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load items: {ex.Message}");
+            items = new List<Item>();
+        }
+    }
+
+    private async Task HandleToggleChanged()
+    {
+        try
+        {
+            ApiResponse result;
+            if (isModEnabled)
+            {
+                Console.WriteLine("Enabling mod...");
+                result = await ModService.EnableAsync();
+            }
+            else
+            {
+                Console.WriteLine("Disabling mod...");
+                result = await ModService.DisableAsync();
+            }
+
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                Console.WriteLine($"Error toggling mod: {result.Error}");
+            }
+            else
+            {
+                Console.WriteLine($"Mod toggle result: {result.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error handling toggle change: {ex.Message}");
+        }
+    }
+
+    private async Task HandlePlayerSelectionChanged(List<string> selectedPlayerNames)
+    {
+        try
+        {
+            Console.WriteLine($"Player selection changed: {string.Join(", ", selectedPlayerNames)}");
+            var result = await ModService.SetAffectedPlayersAsync(selectedPlayerNames);
+            
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                Console.WriteLine($"Error setting affected players: {result.Error}");
+            }
+            else
+            {
+                Console.WriteLine($"Successfully updated affected players: {result.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error handling player selection change: {ex.Message}");
+        }
+    }
+}

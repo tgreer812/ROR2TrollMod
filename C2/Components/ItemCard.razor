@@ -1,0 +1,65 @@
+<div class="item-card @GetRarityClass()" @onclick="HandleCardClick">
+    <div class="item-header">
+        <div class="item-icon">
+            @if (!string.IsNullOrEmpty(Item.IconUrl))
+            {
+                <img src="@Item.IconUrl" alt="@Item.DisplayName" />
+            }
+            else
+            {
+                <div class="item-name-icon">@GetItemNameInitials()</div>
+            }
+        </div>
+        <div class="item-info">
+            <h3 class="item-name">@Item.DisplayName</h3>
+            <span class="item-rarity">@Item.TierName</span>
+        </div>
+    </div>
+    
+    <div class="item-description">
+        <p>@Item.Description</p>
+    </div>
+    
+    <div class="item-actions">
+        <div class="quantity-display">
+            <span>Quantity: @Item.Quantity</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Item Item { get; set; } = new();
+    [Parameter] public EventCallback<Item> OnCardClick { get; set; }
+
+    private async Task HandleCardClick()
+    {
+        await OnCardClick.InvokeAsync(Item);
+    }
+
+    private string GetItemNameInitials()
+    {
+        var nameToUse = !string.IsNullOrEmpty(Item.DisplayName) ? Item.DisplayName : Item.Name;
+        if (string.IsNullOrEmpty(nameToUse))
+            return "?";
+        
+        // Split by spaces and take first letter of each word, max 3 letters
+        var words = nameToUse.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var initials = string.Join("", words.Take(3).Select(w => w[0]));
+        return initials.ToUpper();
+    }
+
+    private string GetRarityClass()
+    {
+        return Item.Tier.ToLower() switch
+        {
+            "tier1" => "rarity-common",        // Common - Black
+            "tier2" => "rarity-uncommon",      // Uncommon - Green
+            "tier3" => "rarity-legendary",     // Legendary - Red
+            "equipment" => "rarity-equipment", // Equipment - Orange
+            "boss" => "rarity-boss",           // Boss - Yellow
+            "lunar" => "rarity-lunar",         // Lunar - Light Blue
+            "notier" => "rarity-common",
+            _ => "rarity-common"
+        };
+    }
+}

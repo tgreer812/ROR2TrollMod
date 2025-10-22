@@ -1,0 +1,52 @@
+<div class="item-cards-container">
+    @if (IsLoading)
+    {
+        <div class="loading-message">
+            <p>Loading items...</p>
+        </div>
+    }
+    else if (Items.Any())
+    {
+        <div class="cards-grid">
+            @foreach (var item in Items)
+            {
+                <ItemCard Item="@item" OnCardClick="@HandleCardClick" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-items-message">
+            <p>No items available.</p>
+        </div>
+    }
+</div>
+
+@inject IRoR2ModService ModService
+
+@code {
+    [Parameter] public List<Item> Items { get; set; } = new();
+    [Parameter] public bool IsLoading { get; set; } = false;
+
+    private async Task HandleCardClick(Item item)
+    {
+        try
+        {
+            Console.WriteLine($"Setting item to: {item.Name}");
+            var result = await ModService.SetItemByNameAsync(item.Name);
+            
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                Console.WriteLine($"Error setting item: {result.Error}");
+            }
+            else
+            {
+                Console.WriteLine($"Successfully set item: {result.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error handling card click: {ex.Message}");
+        }
+    }
+}
