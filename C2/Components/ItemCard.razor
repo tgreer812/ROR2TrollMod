@@ -24,22 +24,12 @@
         <div class="quantity-display">
             <span>Quantity: @Item.Quantity</span>
         </div>
-        <div class="action-buttons">
-            <button class="btn btn-give" @onclick="@(() => HandleAction("give"))">Give</button>
-            <button class="btn btn-remove" @onclick="@(() => HandleAction("remove"))">Remove</button>
-        </div>
     </div>
 </div>
 
 @code {
     [Parameter] public Item Item { get; set; } = new();
-    [Parameter] public EventCallback<(Item, string)> OnItemAction { get; set; }
     [Parameter] public EventCallback<Item> OnCardClick { get; set; }
-
-    private async Task HandleAction(string action)
-    {
-        await OnItemAction.InvokeAsync((Item, action));
-    }
 
     private async Task HandleCardClick()
     {
@@ -62,11 +52,12 @@
     {
         return Item.Tier.ToLower() switch
         {
-            "tier1" => "rarity-common",
-            "tier2" => "rarity-uncommon", 
-            "tier3" => "rarity-legendary",
-            "boss" => "rarity-boss",
-            "lunar" => "rarity-lunar",
+            "tier1" => "rarity-common",        // Common - Black
+            "tier2" => "rarity-uncommon",      // Uncommon - Green
+            "tier3" => "rarity-legendary",     // Legendary - Red
+            "equipment" => "rarity-equipment", // Equipment - Orange
+            "boss" => "rarity-boss",           // Boss - Yellow
+            "lunar" => "rarity-lunar",         // Lunar - Light Blue
             "notier" => "rarity-common",
             _ => "rarity-common"
         };

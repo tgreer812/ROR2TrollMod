@@ -15,23 +15,27 @@
 
 /* Rarity-based border colors */
 .rarity-common {
-    border-left-color: #ffffff;
+    border-left-color: #000000;
 }
 
 .rarity-uncommon {
-    border-left-color: #1eff00;
+    border-left-color: #00ff00;
 }
 
 .rarity-legendary {
-    border-left-color: #ff6b00;
-}
-
-.rarity-boss {
     border-left-color: #ff0000;
 }
 
+.rarity-equipment {
+    border-left-color: #ff8000;
+}
+
+.rarity-boss {
+    border-left-color: #ffff00;
+}
+
 .rarity-lunar {
-    border-left-color: #00d4ff;
+    border-left-color: #87ceeb;
 }
 
 .item-header {
@@ -118,40 +122,4 @@
     font-weight: 500;
 }
 
-.action-buttons {
-    display: flex;
-    gap: 8px;
-}
 
-.btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.btn-give {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn-give:hover {
-    background-color: #218838;
-}
-
-.btn-remove {
-    background-color: #dc3545;
-    color: white;
-}
-
-.btn-remove:hover {
-    background-color: #c82333;
-}
-
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}

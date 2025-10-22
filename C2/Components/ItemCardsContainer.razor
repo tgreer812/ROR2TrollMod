@@ -10,7 +10,7 @@
         <div class="cards-grid">
             @foreach (var item in Items)
             {
-                <ItemCard Item="@item" OnItemAction="@HandleItemAction" OnCardClick="@HandleCardClick" />
+                <ItemCard Item="@item" OnCardClick="@HandleCardClick" />
             }
         </div>
     }
@@ -27,13 +27,6 @@
 @code {
     [Parameter] public List<Item> Items { get; set; } = new();
     [Parameter] public bool IsLoading { get; set; } = false;
-
-    private void HandleItemAction((Item item, string action) args)
-    {
-        // TODO: Handle item actions (give, remove, etc.)
-        var (item, action) = args;
-        Console.WriteLine($"Action '{action}' requested for item '{item.Name}'");
-    }
 
     private async Task HandleCardClick(Item item)
     {
