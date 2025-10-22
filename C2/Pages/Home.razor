@@ -8,7 +8,7 @@
     
     <div class="controls-section">
         <EnableToggle @bind-IsEnabled="isModEnabled" @bind-IsEnabled:after="HandleToggleChanged" />
-        <PlayerDropdown @bind-SelectedPlayer="selectedPlayer" Players="players" />
+        <PlayerSelection Players="@playerList" IsLoading="@isLoadingPlayers" OnSelectionChanged="@HandlePlayerSelectionChanged" />
     </div>
 
     <div class="item-cards-section">
@@ -19,10 +19,10 @@
 
 @code {
     private bool isModEnabled = false;
-    private string selectedPlayer = "";
-    private List<string> players = new List<string>();
+    private List<Player> playerList = new List<Player>();
     private List<Item> items = new List<Item>();
     private bool isLoading = true;
+    private bool isLoadingPlayers = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -32,8 +32,10 @@
     private async Task LoadData()
     {
         isLoading = true;
+        isLoadingPlayers = true;
         await Task.WhenAll(LoadPlayers(), LoadItems());
         isLoading = false;
+        isLoadingPlayers = false;
         StateHasChanged();
     }
 
@@ -41,13 +43,12 @@
     {
         try
         {
-            var playerList = await ModService.GetAllPlayersAsync();
-            players = playerList.Select(p => p.Name).ToList();
+            playerList = await ModService.GetAllPlayersAsync();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to load players: {ex.Message}");
-            players = new List<string>();
+            playerList = new List<Player>();
         }
     }
 
@@ -92,6 +93,28 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error handling toggle change: {ex.Message}");
+        }
+    }
+
+    private async Task HandlePlayerSelectionChanged(List<string> selectedPlayerNames)
+    {
+        try
+        {
+            Console.WriteLine($"Player selection changed: {string.Join(", ", selectedPlayerNames)}");
+            var result = await ModService.SetAffectedPlayersAsync(selectedPlayerNames);
+            
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                Console.WriteLine($"Error setting affected players: {result.Error}");
+            }
+            else
+            {
+                Console.WriteLine($"Successfully updated affected players: {result.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error handling player selection change: {ex.Message}");
         }
     }
 }

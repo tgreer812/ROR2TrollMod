@@ -14,6 +14,7 @@ public interface IRoR2ModService
     Task<ApiResponse> EnableAsync();
     Task<ApiResponse> DisableAsync();
     Task<ApiResponse> SetItemByNameAsync(string itemName);
+    Task<ApiResponse> SetAffectedPlayersAsync(List<string> playerNames);
 }
 
 public class RoR2ModService : IRoR2ModService
@@ -161,6 +162,24 @@ public class RoR2ModService : IRoR2ModService
         catch (Exception ex)
         {
             Console.WriteLine($"Error setting item: {ex.Message}");
+            return new ApiResponse { Message = $"Error: {ex.Message}" };
+        }
+    }
+
+    public async Task<ApiResponse> SetAffectedPlayersAsync(List<string> playerNames)
+    {
+        try
+        {
+            var requestBody = System.Text.Json.JsonSerializer.Serialize(new { players = playerNames });
+            var content = new StringContent(requestBody, System.Text.Encoding.UTF8, "application/json");
+            
+            var response = await _httpClient.PostAsync($"{_baseUrl}/api/set-players", content);
+            var json = await response.Content.ReadAsStringAsync();
+            return System.Text.Json.JsonSerializer.Deserialize<ApiResponse>(json) ?? new ApiResponse();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting affected players: {ex.Message}");
             return new ApiResponse { Message = $"Error: {ex.Message}" };
         }
     }

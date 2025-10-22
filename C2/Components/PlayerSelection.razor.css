@@ -1,0 +1,84 @@
+.player-selection-container {
+    min-width: 250px;
+}
+
+.player-selection-title {
+    margin: 0 0 12px 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.loading-message, .no-players-message {
+    text-align: center;
+    padding: 10px 0;
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.players-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.player-item {
+    margin-bottom: 8px;
+}
+
+.player-checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.player-checkbox-label:hover {
+    background-color: #e9ecef;
+}
+
+.player-checkbox {
+    margin-right: 8px;
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.player-name {
+    font-size: 0.9rem;
+    color: #495057;
+    font-weight: 500;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.selection-summary {
+    font-size: 0.85rem;
+    color: #6c757d;
+    text-align: center;
+    padding-top: 8px;
+    font-weight: 500;
+}
+
+/* Scrollbar styling for players list */
+.players-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.players-list::-webkit-scrollbar-track {
+    background: #f1f3f4;
+    border-radius: 3px;
+}
+
+.players-list::-webkit-scrollbar-thumb {
+    background: #c1c8cd;
+    border-radius: 3px;
+}
+
+.players-list::-webkit-scrollbar-thumb:hover {
+    background: #a8b2ba;
+}
