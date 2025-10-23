@@ -66,6 +66,7 @@ namespace ExamplePlugin
             //On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
             On.RoR2.ChestBehavior.BaseItemDrop += ChestBehavior_BaseItemDropHook;
             On.RoR2.PurchaseInteraction.OnInteractionBegin += PurchaseInteraction_OnInteractionBeginHook;
+            On.RoR2.ShrineChanceBehavior.AddShrineStack += ShrineChanceBehavior_AddShrineStackHook;
         }
 
         // OnDisable is called when the plugin becomes disabled or inactive
@@ -77,6 +78,7 @@ namespace ExamplePlugin
             //On.RoR2.HealthComponent.TakeDamage -= HealthComponent_TakeDamage;
             On.RoR2.ChestBehavior.BaseItemDrop -= ChestBehavior_BaseItemDropHook;
             On.RoR2.PurchaseInteraction.OnInteractionBegin -= PurchaseInteraction_OnInteractionBeginHook;
+            On.RoR2.ShrineChanceBehavior.AddShrineStack -= ShrineChanceBehavior_AddShrineStackHook;
         }
 
         private void OnRunStart(Run run)
@@ -115,7 +117,7 @@ namespace ExamplePlugin
             // is 'selected'
             if (
                 ItemController.IsEnabled &&
-                PluginState.SelectedPlayers.Contains(PluginState.LastPurchaser) &&
+                PluginState.SelectedPlayers.Contains(PluginState.LastPurchaseInteractorUsername) &&
                 ItemController.CurrentPickupIndex != PickupIndex.none)
             {
                 self.dropPickup = ItemController.CurrentPickupIndex;
@@ -128,11 +130,37 @@ namespace ExamplePlugin
         private static void PurchaseInteraction_OnInteractionBeginHook(On.RoR2.PurchaseInteraction.orig_OnInteractionBegin orig, PurchaseInteraction self, Interactor activator)
         {
             // Save the name of the last person that opened a chest
+            var openerName = GetUsernameFromInteractor(activator);
+            PluginState.LastPurchaseInteractorUsername = openerName;
+            orig(self, activator);
+        }
+
+        private static void ShrineChanceBehavior_AddShrineStackHook(On.RoR2.ShrineChanceBehavior.orig_AddShrineStack orig, ShrineChanceBehavior self, Interactor activator)
+        {
+
+            // Save the current failure chance
+            float currentFailChance = self.failureChance;
+
+            // Alter it if the feature to do so is enabled
+            if (
+                ShrineChanceController.IsEnabled &&
+                PluginState.SelectedPlayers.Contains(PluginState.LastPurchaseInteractorUsername))
+            {
+                var openerName = GetUsernameFromInteractor(activator);
+                self.failureChance = ShrineChanceController.GetDesiredFailureChance();
+            }
+
+            orig(self, activator);
+
+            // Restore value to original
+            self.failureChance = currentFailChance;
+        }
+
+        private static string GetUsernameFromInteractor(Interactor activator)
+        {
             var body = activator ? activator.GetComponent<CharacterBody>() : null;
             var user = body?.master?.playerCharacterMasterController?.networkUser;
-            var openerName = user?.userName ?? body?.GetUserName() ?? "Unknown";
-            PluginState.LastPurchaser = openerName;
-            orig(self, activator);
+            return user?.userName ?? body?.GetUserName() ?? "Unknown";
         }
 
         // The Update() method is run on every frame of the game.
@@ -141,15 +169,21 @@ namespace ExamplePlugin
             // This if statement checks if the player has currently pressed F2.
             if (Input.GetKeyDown(KeyCode.F2))
             {
+                Log.Info($"Shrine is now guaranteed");
+                ShrineChanceController.Enable();
+                ShrineChanceController.MakeShrineGuaranteed();
                 // Cycle through items
-                ItemController.CycleItem();
-                Log.Info($"Item: {ItemController.GetCurrentStatus()}");
+                // ItemController.CycleItem();
+                // Log.Info($"Item: {ItemController.GetCurrentStatus()}");
             }
 
-            if (Input.GetKeyDown(KeyCode.F3)) 
+            if (Input.GetKeyDown(KeyCode.F3))
             {
-                ItemController.ToggleEnabled();
-                Log.Info($"Item Controller: {ItemController.GetCurrentStatus()}");
+                Log.Info($"Shrine is now impossible");
+                ShrineChanceController.Enable();
+                ShrineChanceController.MakeShrineImpossible();
+                // ItemController.ToggleEnabled();
+                // Log.Info($"Item Controller: {ItemController.GetCurrentStatus()}");
             }
 
             if (Input.GetKeyDown(KeyCode.F4))
@@ -195,6 +229,10 @@ namespace ExamplePlugin
                 Log.Info("  POST /api/disable - Disable item picker");
                 Log.Info("  POST /api/set-item - Set item by name (JSON: {\"itemName\":\"ItemName\"})");
                 Log.Info("  POST /api/set-players - Set selected players (JSON: {\"players\":[\"PlayerName1\",\"PlayerName2\"]})");
+                Log.Info("  POST /api/shrine/enable - Enable shrine of chance controller");
+                Log.Info("  POST /api/shrine/disable - Disable shrine of chance controller");
+                Log.Info("  POST /api/shrine/guaranteed - Make shrine of chance always succeed");
+                Log.Info("  POST /api/shrine/impossible - Make shrine of chance always fail");
             }
             catch (System.Exception ex)
             {

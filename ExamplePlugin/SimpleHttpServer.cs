@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -7,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using SimpleJSON;
+using ExamplePlugin;
 
 namespace LightweightAPI
 {
@@ -171,6 +171,18 @@ namespace LightweightAPI
                     case "POST /api/set-players":
                         responseJson = await SetSelectedPlayers(request);
                         break;
+                    case "POST /api/shrine/enable":
+                        responseJson = EnableShrine();
+                        break;
+                    case "POST /api/shrine/disable":
+                        responseJson = DisableShrine();
+                        break;
+                    case "POST /api/shrine/guaranteed":
+                        responseJson = MakeShrineGuaranteed();
+                        break;
+                    case "POST /api/shrine/impossible":
+                        responseJson = MakeShrineImpossible();
+                        break;
                     default:
                         response.StatusCode = 404;
                         responseJson = $"{{\"error\":\"Not Found\",\"path\":\"{path}\",\"method\":\"{method}\"}}";
@@ -292,18 +304,21 @@ namespace LightweightAPI
             }
         }
 
+        private string getUserIdFromNetworkUser(RoR2.NetworkUser user)
+            => (user.Network_id.value == 0) ? user.Network_id.strValue : user.Network_id.value.ToString();
+
         private string GetAllPlayers()
         {
             try
             {
                 var playersArray = new JSONArray();
                 var allPlayers = ExamplePlugin.PluginState.AllPlayers ?? new List<RoR2.NetworkUser>();
-                
+
                 foreach (var player in allPlayers)
                 {
                     var playerObj = new JSONObject();
-                    playerObj["name"] = player.userName ?? "Unknown";
-                    playerObj["id"] = player.Network_id.steamId.ToString();
+                    playerObj["name"] = player.GetNetworkPlayerName().GetResolvedName();
+                    playerObj["id"] = getUserIdFromNetworkUser(player);
                     playersArray.Add(playerObj);
                 }
 
@@ -392,6 +407,90 @@ namespace LightweightAPI
             {
                 var errorResponse = new JSONObject();
                 errorResponse["error"] = "Failed to set selected players";
+                errorResponse["message"] = ex.Message;
+                errorResponse["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return errorResponse.ToString();
+            }
+        }
+
+        private string EnableShrine()
+        {
+            try
+            {
+                ExamplePlugin.ShrineChanceController.Enable();
+                var response = new JSONObject();
+                response["message"] = "Shrine of Chance controller enabled";
+                response["enabled"] = true;
+                response["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return response.ToString();
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new JSONObject();
+                errorResponse["error"] = "Failed to enable shrine controller";
+                errorResponse["message"] = ex.Message;
+                errorResponse["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return errorResponse.ToString();
+            }
+        }
+
+        private string DisableShrine()
+        {
+            try
+            {
+                ExamplePlugin.ShrineChanceController.Disable();
+                var response = new JSONObject();
+                response["message"] = "Shrine of Chance controller disabled";
+                response["enabled"] = false;
+                response["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return response.ToString();
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new JSONObject();
+                errorResponse["error"] = "Failed to disable shrine controller";
+                errorResponse["message"] = ex.Message;
+                errorResponse["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return errorResponse.ToString();
+            }
+        }
+
+        private string MakeShrineGuaranteed()
+        {
+            try
+            {
+                ExamplePlugin.ShrineChanceController.MakeShrineGuaranteed();
+                var response = new JSONObject();
+                response["message"] = "Shrine of Chance set to guaranteed success";
+                response["mode"] = "guaranteed";
+                response["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return response.ToString();
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new JSONObject();
+                errorResponse["error"] = "Failed to set shrine to guaranteed";
+                errorResponse["message"] = ex.Message;
+                errorResponse["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return errorResponse.ToString();
+            }
+        }
+
+        private string MakeShrineImpossible()
+        {
+            try
+            {
+                ExamplePlugin.ShrineChanceController.MakeShrineImpossible();
+                var response = new JSONObject();
+                response["message"] = "Shrine of Chance set to impossible (always fail)";
+                response["mode"] = "impossible";
+                response["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+                return response.ToString();
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new JSONObject();
+                errorResponse["error"] = "Failed to set shrine to impossible";
                 errorResponse["message"] = ex.Message;
                 errorResponse["timestamp"] = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
                 return errorResponse.ToString();

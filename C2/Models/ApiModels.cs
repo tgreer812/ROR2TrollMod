@@ -66,3 +66,10 @@ public class PlayersResponse
     [JsonPropertyName("timestamp")]
     public string Timestamp { get; set; } = string.Empty;
 }
+
+public enum ShrineMode
+{
+    Off,
+    Guaranteed,
+    Impossible
+}

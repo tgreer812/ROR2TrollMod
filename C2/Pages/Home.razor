@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using C2.Components
+@using C2.Models
 @inject IRoR2ModService ModService
 
 <PageTitle>RoR2 Troll Mod</PageTitle>
@@ -9,6 +11,7 @@
     <div class="controls-section">
         <EnableToggle @bind-IsEnabled="isModEnabled" @bind-IsEnabled:after="HandleToggleChanged" />
         <PlayerSelection Players="@playerList" IsLoading="@isLoadingPlayers" OnSelectionChanged="@HandlePlayerSelectionChanged" />
+        <ShrineControl CurrentMode="@currentShrineMode" IsLoading="@isShrineLoading" OnModeChanged="@HandleShrineModeChanged" @ref="shrineControlRef" />
     </div>
 
     <div class="item-cards-section">
@@ -23,6 +26,9 @@
     private List<Item> items = new List<Item>();
     private bool isLoading = true;
     private bool isLoadingPlayers = true;
+    private ShrineMode currentShrineMode = ShrineMode.Off;
+    private bool isShrineLoading = false;
+    private ShrineControl? shrineControlRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -115,6 +121,74 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error handling player selection change: {ex.Message}");
+        }
+    }
+
+    private async Task HandleShrineModeChanged(ShrineMode newMode)
+    {
+        try
+        {
+            isShrineLoading = true;
+            StateHasChanged();
+            
+            ApiResponse result;
+            
+            switch (newMode)
+            {
+                case ShrineMode.Off:
+                    Console.WriteLine("Disabling shrine controller...");
+                    result = await ModService.DisableShrineAsync();
+                    break;
+                    
+                case ShrineMode.Guaranteed:
+                    Console.WriteLine("Setting shrine to guaranteed...");
+                    // First enable the shrine controller
+                    var enableResult = await ModService.EnableShrineAsync();
+                    if (!string.IsNullOrEmpty(enableResult.Error))
+                    {
+                        throw new Exception($"Failed to enable shrine: {enableResult.Error}");
+                    }
+                    // Then set it to guaranteed
+                    result = await ModService.MakeShrineGuaranteedAsync();
+                    break;
+                    
+                case ShrineMode.Impossible:
+                    Console.WriteLine("Setting shrine to impossible...");
+                    // First enable the shrine controller
+                    var enableResult2 = await ModService.EnableShrineAsync();
+                    if (!string.IsNullOrEmpty(enableResult2.Error))
+                    {
+                        throw new Exception($"Failed to enable shrine: {enableResult2.Error}");
+                    }
+                    // Then set it to impossible
+                    result = await ModService.MakeShrineImpossibleAsync();
+                    break;
+                    
+                default:
+                    throw new ArgumentException($"Unknown shrine mode: {newMode}");
+            }
+            
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                shrineControlRef?.SetMessage($"Error: {result.Error}", true);
+                Console.WriteLine($"Error changing shrine mode: {result.Error}");
+            }
+            else
+            {
+                currentShrineMode = newMode;
+                shrineControlRef?.SetMessage(result.Message ?? "Shrine mode updated successfully", false);
+                Console.WriteLine($"Successfully changed shrine mode to {newMode}: {result.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            shrineControlRef?.SetMessage($"Error: {ex.Message}", true);
+            Console.WriteLine($"Error handling shrine mode change: {ex.Message}");
+        }
+        finally
+        {
+            isShrineLoading = false;
+            StateHasChanged();
         }
     }
 }

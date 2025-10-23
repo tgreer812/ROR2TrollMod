@@ -15,6 +15,10 @@ public interface IRoR2ModService
     Task<ApiResponse> DisableAsync();
     Task<ApiResponse> SetItemByNameAsync(string itemName);
     Task<ApiResponse> SetAffectedPlayersAsync(List<string> playerNames);
+    Task<ApiResponse> EnableShrineAsync();
+    Task<ApiResponse> DisableShrineAsync();
+    Task<ApiResponse> MakeShrineGuaranteedAsync();
+    Task<ApiResponse> MakeShrineImpossibleAsync();
 }
 
 public class RoR2ModService : IRoR2ModService
@@ -181,6 +185,66 @@ public class RoR2ModService : IRoR2ModService
         catch (Exception ex)
         {
             Console.WriteLine($"Error setting affected players: {ex.Message}");
+            return new ApiResponse { Message = $"Error: {ex.Message}" };
+        }
+    }
+
+    public async Task<ApiResponse> EnableShrineAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"{_baseUrl}/api/shrine/enable", null);
+            var json = await response.Content.ReadAsStringAsync();
+            return System.Text.Json.JsonSerializer.Deserialize<ApiResponse>(json) ?? new ApiResponse();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error enabling shrine: {ex.Message}");
+            return new ApiResponse { Message = $"Error: {ex.Message}" };
+        }
+    }
+
+    public async Task<ApiResponse> DisableShrineAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"{_baseUrl}/api/shrine/disable", null);
+            var json = await response.Content.ReadAsStringAsync();
+            return System.Text.Json.JsonSerializer.Deserialize<ApiResponse>(json) ?? new ApiResponse();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error disabling shrine: {ex.Message}");
+            return new ApiResponse { Message = $"Error: {ex.Message}" };
+        }
+    }
+
+    public async Task<ApiResponse> MakeShrineGuaranteedAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"{_baseUrl}/api/shrine/guaranteed", null);
+            var json = await response.Content.ReadAsStringAsync();
+            return System.Text.Json.JsonSerializer.Deserialize<ApiResponse>(json) ?? new ApiResponse();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting shrine to guaranteed: {ex.Message}");
+            return new ApiResponse { Message = $"Error: {ex.Message}" };
+        }
+    }
+
+    public async Task<ApiResponse> MakeShrineImpossibleAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"{_baseUrl}/api/shrine/impossible", null);
+            var json = await response.Content.ReadAsStringAsync();
+            return System.Text.Json.JsonSerializer.Deserialize<ApiResponse>(json) ?? new ApiResponse();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting shrine to impossible: {ex.Message}");
             return new ApiResponse { Message = $"Error: {ex.Message}" };
         }
     }
