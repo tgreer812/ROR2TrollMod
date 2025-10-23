@@ -292,6 +292,9 @@ namespace LightweightAPI
             }
         }
 
+        private string getUserIdFromNetworkUser(RoR2.NetworkUser user)
+            => (user.Network_id.value == 0) ? user.Network_id.strValue : user.Network_id.value.ToString();
+
         private string GetAllPlayers()
         {
             try
@@ -302,8 +305,8 @@ namespace LightweightAPI
                 foreach (var player in allPlayers)
                 {
                     var playerObj = new JSONObject();
-                    playerObj["name"] = player.userName ?? "Unknown";
-                    playerObj["id"] = player.Network_id.steamId.ToString();
+                    playerObj["name"] = player.GetNetworkPlayerName().GetResolvedName();
+                    playerObj["id"] = getUserIdFromNetworkUser(player);
                     playersArray.Add(playerObj);
                 }
 

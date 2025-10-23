@@ -7,7 +7,7 @@ namespace ExamplePlugin
 {
     public static class PluginState
     {
-        public static string LastPurchaser = "";
+        public static string LastPurchaseInteractorUsername = "";
 
         public static List<NetworkUser> AllPlayers = new List<NetworkUser>();
         
@@ -18,7 +18,7 @@ namespace ExamplePlugin
             get 
             {
                 string ret = string.Empty;
-                ret += $"LastPurchaser: {LastPurchaser}\n";
+                ret += $"LastPurchaser: {LastPurchaseInteractorUsername}\n";
                 ret += "=====All Players=====\n";
                 foreach (var player in AllPlayers) 
                 {
