@@ -6,8 +6,6 @@ namespace ExamplePlugin
     {
         public static bool IsEnabled { get { return enabled; } }
 
-        public static void ToggleEnabled() => enabled = !enabled;
-
         public static void Enable() => enabled = true;
 
         public static void Disable() => enabled = false;

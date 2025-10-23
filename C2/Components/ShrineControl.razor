@@ -1,0 +1,98 @@
+@using C2.Models
+@using C2.Services
+
+<div class="shrine-control-container">
+    <h3 class="shrine-control-title">Shrine of Chance Control</h3>
+    <div class="shrine-mode-options">
+        <div class="radio-option">
+            <label class="radio-label">
+                <input type="radio" 
+                       name="shrineMode" 
+                       value="@ShrineMode.Off" 
+                       checked="@(CurrentMode == ShrineMode.Off)"
+                       @onchange="@((e) => HandleModeChange(ShrineMode.Off))"
+                       disabled="@IsLoading" />
+                <span class="radio-text">Off</span>
+            </label>
+        </div>
+        <div class="radio-option">
+            <label class="radio-label">
+                <input type="radio" 
+                       name="shrineMode" 
+                       value="@ShrineMode.Guaranteed" 
+                       checked="@(CurrentMode == ShrineMode.Guaranteed)"
+                       @onchange="@((e) => HandleModeChange(ShrineMode.Guaranteed))"
+                       disabled="@IsLoading" />
+                <span class="radio-text">Guaranteed</span>
+            </label>
+        </div>
+        <div class="radio-option">
+            <label class="radio-label">
+                <input type="radio" 
+                       name="shrineMode" 
+                       value="@ShrineMode.Impossible" 
+                       checked="@(CurrentMode == ShrineMode.Impossible)"
+                       @onchange="@((e) => HandleModeChange(ShrineMode.Impossible))"
+                       disabled="@IsLoading" />
+                <span class="radio-text">Impossible</span>
+            </label>
+        </div>
+    </div>
+    
+    @if (IsLoading)
+    {
+        <div class="loading-indicator">
+            <span>Updating shrine mode...</span>
+        </div>
+    }
+    
+    @if (!string.IsNullOrEmpty(LastMessage))
+    {
+        <div class="shrine-message @(HasError ? "error" : "success")">
+            <span>@LastMessage</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ShrineMode CurrentMode { get; set; } = ShrineMode.Off;
+    [Parameter] public bool IsLoading { get; set; } = false;
+    [Parameter] public EventCallback<ShrineMode> OnModeChanged { get; set; }
+    
+    private string LastMessage = string.Empty;
+    private bool HasError = false;
+
+    private async Task HandleModeChange(ShrineMode newMode)
+    {
+        if (IsLoading || CurrentMode == newMode) return;
+        
+        IsLoading = true;
+        HasError = false;
+        LastMessage = string.Empty;
+        StateHasChanged();
+        
+        try
+        {
+            CurrentMode = newMode;
+            await OnModeChanged.InvokeAsync(newMode);
+        }
+        catch (Exception ex)
+        {
+            HasError = true;
+            LastMessage = $"Error: {ex.Message}";
+            Console.WriteLine($"Error changing shrine mode: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    public void SetMessage(string message, bool isError = false)
+    {
+        LastMessage = message;
+        HasError = isError;
+        StateHasChanged();
+    }
+}

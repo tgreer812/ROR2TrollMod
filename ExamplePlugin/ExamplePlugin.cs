@@ -229,6 +229,10 @@ namespace ExamplePlugin
                 Log.Info("  POST /api/disable - Disable item picker");
                 Log.Info("  POST /api/set-item - Set item by name (JSON: {\"itemName\":\"ItemName\"})");
                 Log.Info("  POST /api/set-players - Set selected players (JSON: {\"players\":[\"PlayerName1\",\"PlayerName2\"]})");
+                Log.Info("  POST /api/shrine/enable - Enable shrine of chance controller");
+                Log.Info("  POST /api/shrine/disable - Disable shrine of chance controller");
+                Log.Info("  POST /api/shrine/guaranteed - Make shrine of chance always succeed");
+                Log.Info("  POST /api/shrine/impossible - Make shrine of chance always fail");
             }
             catch (System.Exception ex)
             {
